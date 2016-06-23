@@ -98,7 +98,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   }
 
   // Set frame rate
-  retVal &= PointGreyCamera::setProperty(FRAME_RATE, false, config.frame_rate);
+  retVal &= PointGreyCamera::setProperty(FRAME_RATE, config.auto_frame_rate, config.frame_rate);
 
   // Set exposure
   retVal &= PointGreyCamera::setProperty(AUTO_EXPOSURE, config.auto_exposure, config.exposure);

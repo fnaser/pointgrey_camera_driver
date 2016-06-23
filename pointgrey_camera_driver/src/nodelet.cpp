@@ -250,7 +250,7 @@ private:
     pg_.setDesiredCamera((uint32_t)serial);
 
     // Get GigE camera parameters:
-    pnh.param<int>("packet_size", packet_size_, 1400);
+    pnh.param<int>("packet_size", packet_size_, 9000);
     pnh.param<bool>("auto_packet_size", auto_packet_size_, true);
     pnh.param<int>("packet_delay", packet_delay_, 4000);
 
