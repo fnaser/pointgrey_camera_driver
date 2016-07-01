@@ -154,7 +154,7 @@ private:
     NODELET_DEBUG("Connect callback!");
     boost::mutex::scoped_lock scopedLock(connect_mutex_); // Grab the mutex.  Wait until we're done initializing before letting this function through.
     // Check if we should disconnect (there are 0 subscribers to our data)
-    if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
+    if(it_pub_.getNumSubscribers() == 0 )
     {
       try
       {
@@ -172,7 +172,7 @@ private:
         NODELET_ERROR("%s", e.what());
       }
     }
-    else if(!sub_)     // We need to connect
+    if(!sub_)     // We need to connect
     {
       NODELET_DEBUG("Connecting");
       // Try connecting to the camera
@@ -293,16 +293,16 @@ private:
     double freq_tolerance; // Tolerance before stating error on publish frequency, fractional percent of desired frequencies.
     pnh.param<double>("freq_tolerance", freq_tolerance, 0.1);
     int window_size; // Number of samples to consider in frequency
-    pnh.param<int>("window_size", window_size, 100);
+    pnh.param<int>("window_size", window_size, 10);
     double min_acceptable; // The minimum publishing delay (in seconds) before warning.  Negative values mean future dated messages.
     pnh.param<double>("min_acceptable_delay", min_acceptable, 0.0);
     double max_acceptable; // The maximum publishing delay (in seconds) before warning.
     pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
     ros::SubscriberStatusCallback cb2 = boost::bind(&PointGreyCameraNodelet::connectCb, this);
-    pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(nh.advertise<wfov_camera_msgs::WFOVImage>("image", 5, cb2, cb2),
-               updater_,
-               diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
-               diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable)));
+    pub_.reset(new diagnostic_updater::TopicDiagnostic("image_raw",
+						       updater_,
+						       diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
+						       diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable)));
   }
 
   /*!
@@ -350,14 +350,12 @@ private:
         wfov_image->info = *ci_;
 
         // Publish the full message
-        pub_->publish(wfov_image);
+        // pub_->publish(wfov_image);
 
         // Publish the message using standard image transport
-        if(it_pub_.getNumSubscribers() > 0)
-        {
-          sensor_msgs::ImagePtr image(new sensor_msgs::Image(wfov_image->image));
-          it_pub_.publish(image, ci_);
-        }
+	sensor_msgs::ImagePtr image(new sensor_msgs::Image(wfov_image->image));
+	it_pub_.publish(image, ci_);
+        pub_->tick(ros::Time::now());
 
 
       }
@@ -406,7 +404,7 @@ private:
   boost::shared_ptr<image_transport::ImageTransport> it_; ///< Needed to initialize and keep the ImageTransport in scope.
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_; ///< Needed to initialize and keep the CameraInfoManager in scope.
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
-  boost::shared_ptr<diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage> > pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
+  boost::shared_ptr<diagnostic_updater::TopicDiagnostic> pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
 
   boost::mutex connect_mutex_;
