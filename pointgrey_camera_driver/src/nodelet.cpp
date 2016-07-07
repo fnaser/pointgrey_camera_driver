@@ -92,6 +92,8 @@ private:
     {
       NODELET_DEBUG("Dynamic reconfigure callback with level: %d", level);
       pg_.setNewConfiguration(config, level);
+      // Set GigE parameters:
+      pg_.setGigEParameters(auto_packet_size_, packet_size_, packet_delay_);
 
       // Store needed parameters for the metadata message
       gain_ = config.gain;
