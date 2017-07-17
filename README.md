@@ -23,6 +23,10 @@ Installation
 ============
 
 ```
+sudo apt-get install libraw1394-11 libgtkmm-2.4-dev  \
+                     libglademm-2.4-dev              \
+                     libgtkglextmm-x11-1.2-dev       \
+                     libusb-1.0-0 -y
 sudo sed -i -e 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"/g' /etc/default/grub
 sudo update-grub
 ```
